@@ -69,6 +69,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap.setOnMapClickListener { p0 ->
 
             if (listPoints.size == 10) {
+                mark1 = 0
+                mark2 = 1
                 listPoints.clear()
                 mMap.clear()
             }
@@ -145,13 +147,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     @SuppressLint("StaticFieldLeak")
     private inner class GetDirection(val url: String) :
         AsyncTask<Void, Void, List<List<LatLng>>>() {
+
+        var result = ArrayList<List<LatLng>>()
+
         override fun doInBackground(vararg params: Void?): List<List<LatLng>> {
             val client = OkHttpClient()
             val request = Request.Builder().url(url).build()
             val response = client.newCall(request).execute()
             val data = response.body!!.string()
 
-            val result = ArrayList<List<LatLng>>()
+            result.clear()
+
             try {
                 val respObj = Gson().fromJson(data, MapData::class.java)
                 val path = ArrayList<LatLng>()
@@ -162,10 +168,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+
             return result
         }
 
         override fun onPostExecute(result: List<List<LatLng>>) {
+
             val lineoption = PolylineOptions()
             for (i in result.indices) {
                 lineoption.addAll(result[i])
@@ -174,6 +182,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 lineoption.geodesic(true)
             }
             mMap.addPolyline(lineoption)
+
         }
     }
 
